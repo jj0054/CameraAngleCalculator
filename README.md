@@ -22,9 +22,13 @@ The implementation of the here-explained algorithm can be seen in the following 
 
 After reading the two images, it is important to bring both images to a common size. This is necessary since this might lead to distortion while calculating the angles in the next steps. OpenCV provides the functionality of changing the format of an image by passing the desired size and the image to the resize() function.  
 
+<img width="868" alt="Bildschirmfoto 2024-07-16 um 11 38 22" src="https://github.com/user-attachments/assets/e864f8ba-737f-4d6e-a52c-c4aced548ab9">
+
 ### 2. Feature Detection and Matching
 
 To figure out how much a camera has tilted, we need to first extract similarities from both images. By doing so, the different feature coordinates (key points) can be compared and the tilt determined. 
+
+<img width="868" alt="Bildschirmfoto 2024-07-16 um 11 42 13" src="https://github.com/user-attachments/assets/37b686fc-5336-41aa-9c48-47c50e323fb6">
 
 A commonly used method is the so-called SIFT (Scale-Invariant Feature Transform) algorithm. It is a computer vision technique used for feature detection and description. As a result of applying this algorithm on both images, key points and descriptors are being returned. Key points represent the coordinates of extracted feature points on each image. Descriptors are vectors that give the key points a signature so the features can be found on another image with a different perspective.
 
@@ -32,26 +36,26 @@ The official paper on the SIFT algorithm provides more detailed information on t
 
 The SIFT algorithm can be implemented by the following code:
 
+<img width="868" alt="Bildschirmfoto 2024-07-16 um 11 43 56" src="https://github.com/user-attachments/assets/c089e441-2740-4080-b3a0-ce5b6cbf52c1">
+
 After finding the key points and descriptors of each image, it is important to find their matching features. With a function by OpenCV, it is easy to match the descriptors from both images. 
 
 The result of SIFT and the feature-matching can be visualized in the following picture:
+
+<img width="868" alt="Bildschirmfoto 2024-07-16 um 11 46 30" src="https://github.com/user-attachments/assets/28e73cb4-cce9-4646-b6ca-3f09eee4986a">
 
 ### 3. Homography Estimation
 
 For the purpose of this program, I will be using a mathematical concept known as homography in order to calculate the tilt of the camera. As a brief summary, a homography matrix is used to describe the transformation between two pictures, in particular how a point (x, y) can be projected as (x', y') on another picture. This matrix can be displayed as a 3x3 matrix:
 
-\[
-H =
-\begin{bmatrix}
-h_{11} & h_{12} & h_{13} \\
-h_{21} & h_{22} & h_{23} \\
-h_{31} & h_{32} & h_{33}
-\end{bmatrix}
-\]
+<img width="868" alt="Bildschirmfoto 2024-07-16 um 11 48 07" src="https://github.com/user-attachments/assets/c630dc52-32a6-42e8-9a91-b7676a5a451c">
 
 This type of algorithm deals with common problems associated with computer vision. Common cases are determining the relative angles and position of two cameras that take a picture of the same object. However, the tilt problem that this protocol is addressing concerns a special case—the pure camera rotation problem. In this case, two pictures are taken by the same camera but with different rotations. 
 
 The first step of applying the homography matrix is to have the coordinates of the extracted key points of each image. Additionally, it is necessary to filter out all coordinates that don’t align with the data and are considered outliers. For example, some pairs of key points do not match or poorly match each other, as shown in my example. The RANSAC algorithm (Random sample consensus) can be applied while calculating with the findHomography function provided by OpenCV. This additional step can effectively clean up the data and increase the accuracy of the result.
+
+<img width="868" alt="Bildschirmfoto 2024-07-16 um 11 50 03" src="https://github.com/user-attachments/assets/0c4c7891-72c1-47fe-9bc2-a1d494cfc1ae">
+
 
 ### 4. Camera Intrinsics
 
@@ -59,14 +63,7 @@ One significant problem that can occur when applying the homography matrix is ca
 
 Once the camera intrinsics are known, they can be represented by a \(3 \times 3\) matrix \(K\), which includes the focal length and the principal point (center coordinates of the image). With the intrinsic matrix \(K\) determined, it becomes possible to decompose the homography matrix to extract the camera tilt angles, giving insights into the camera's orientation in space.
 
-\[
-K =
-\begin{bmatrix}
-\text{focallength} & 0 & c_x \\
-0 & \text{focallength} & c_y \\
-0 & 0 & 1
-\end{bmatrix}
-\]
+<img width="300" alt="Bildschirmfoto 2024-07-16 um 11 52 05" src="https://github.com/user-attachments/assets/549b6d52-eb7c-4c92-aa00-5eed12897598">
 
 Different cameras will vary with regard to the intrinsics, and hence, it is crucial to be aware of its different focal lengths or perform the calibration step whenever a different camera is used. This ensures accurate angle extraction and 3D reconstruction. In the provided code, an iPhone 12 camera was used, therefore the camera specifics were provided to construct \(K\). When using a different camera the focal length has to be adjusted.
 
@@ -74,11 +71,16 @@ Different cameras will vary with regard to the intrinsics, and hence, it is cruc
 
 Once the camera intrinsics are determined, the next step is to decompose the homography matrix to extract the rotation matrices, which contain the tilt angles of the camera. This process is crucial for understanding the camera's orientation in space. OpenCV offers a convenient function, decomposeHomographyMat, which facilitates this task by returning the rotation matrix, translation vectors, and normal vectors of the planes involved.
 
+<img width="868" alt="Bildschirmfoto 2024-07-16 um 11 54 08" src="https://github.com/user-attachments/assets/6636f4ca-e11c-4e60-970a-ac08f3526156">
+
+
 However, be aware that given the complexity of decomposing the 3D plane, it is possible to have multiple solutions of rotation. This would be a potential shortcoming for this approach as one rotation needs to be manually chosen.
 
 ### 6. Euler Angles Calculation
 
 The function rotationMatrixToEulerAngles(R) serves to extract Euler angles from a rotation matrix, a crucial step in understanding the camera's orientation in three-dimensional space. These angles denote rotations around the X, Y, and Z axes. To ensure accurate angle calculation, the function incorporates a precautionary measure: it computes the sine of the rotation around the Y-axis and verifies its proximity to zero, thereby detecting potential singularities in the rotation matrix. This robust approach guarantees precise insights into the camera's orientation, even when confronted with matrices nearing singularity.
+
+<img width="868" alt="Bildschirmfoto 2024-07-16 um 11 55 30" src="https://github.com/user-attachments/assets/029c3242-b4d9-4430-9a2e-1a081b4cf56f">
 
 Application of this function is necessary for every rotation matrix previously determined through the decomposition of the homography matrix. Given that a single homography matrix can encapsulate multiple combinations of rotation, translation, and scaling between images, determining the angles of each rotation matrix is imperative. However, before these angles can be utilized for further applications, it's essential to validate the most feasible rotation matrix to ensure accuracy and reliability.
 
