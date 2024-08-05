@@ -61,7 +61,7 @@ The first step of applying the homography matrix is to have the coordinates of t
 
 One significant problem that can occur when applying the homography matrix is camera specifics. This involves knowing the focal length of the camera. Ideally, those specifics are known to the program so that it can have a more accurate estimate of the distance between the object and the camera. If that information is unknown, a camera calibration process might be used but this leads to greater margins of errors and inaccuracy. This process involves taking multiple images of a known calibration pattern, such as a checkerboard, from different angles. It detects the corners of the pattern in each image and solves for the parameters that best describe the transformation between the 3D world and the 2D image plane. Through this step, a rough estimate of camera intrinsics can be obtained.
 
-Once the camera intrinsics are known, they can be represented by a \(3 \times 3\) matrix \(K\), which includes the focal length and the principal point (center coordinates of the image). With the intrinsic matrix \(K\) determined, it becomes possible to decompose the homography matrix to extract the camera tilt angles, giving insights into the camera's orientation in space.
+Once the camera intrinsics are known, they can be represented by a 3x3 matrix \(K\), which includes the focal length and the principal point (center coordinates of the image). With the intrinsic matrix \(K\) determined, it becomes possible to decompose the homography matrix to extract the camera tilt angles, giving insights into the camera's orientation in space.
 
 <img width="300" alt="Bildschirmfoto 2024-07-16 um 11 52 05" src="https://github.com/user-attachments/assets/549b6d52-eb7c-4c92-aa00-5eed12897598">
 
